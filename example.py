@@ -25,7 +25,7 @@ async def is_alive(slug):
         return False
 
 async def openrouter_models():
-    models = requests.get("https://openrouter.ai/api/frontend/models/find?order=top-weekly").json()['data']['models'][:3]
+    models = requests.get("https://openrouter.ai/api/frontend/models/find?order=top-weekly").json()['data']['models']
     models = ((model, is_general_purpose(model['description'])) for model in models)
     models = (model for model, general_purpose in models if await general_purpose)
     models = ((model, is_alive(model['slug'])) async for model in models)
