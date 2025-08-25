@@ -47,7 +47,7 @@ asyncio.gather(
 )
 ```
 
-Don't worry about rate limits, `write` automatically self-throttles as necessary.
+`write` automatically self-throttles as necessary so it's safe to call thousands of `write()`s in parallel with no external rate limiting.
 
 ### Vibe functions
 
