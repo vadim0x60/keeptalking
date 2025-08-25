@@ -3,9 +3,11 @@ from functools import wraps
 from openai import AsyncOpenAI, OpenAI
 from pydantic import create_model, BaseModel
 import asyncio
+import itertools
 
 DEFAULT_TOKENS = 2048
 DEFAULT_MODEL = 'google/gemini-2.5-flash'
+DEFAULT_ROLES = itertools.chain(['system'], itertools.cycle(['user']))
 
 class SyncAsyncError(RuntimeError):
     pass
@@ -57,11 +59,11 @@ def _chat(client, model, roles, messages, structure, tokens):
                 max_completion_tokens=tokens
             ), lambda response: response.choices[0].message.parsed.response)  
 
-async def write(model=DEFAULT_MODEL, roles=['system', 'user'], messages=[], structure=str, tokens=DEFAULT_TOKENS):
+async def write(model=DEFAULT_MODEL, roles=DEFAULT_ROLES, messages=[], structure=str, tokens=DEFAULT_TOKENS):
     response, postproc = _chat(client_async, model, roles=roles, messages=messages, structure=structure, tokens=tokens)
     return postproc(await response)
 
-def talk(model=DEFAULT_MODEL, roles=['system', 'user'], messages=[], structure=str, tokens=DEFAULT_TOKENS):
+def talk(model=DEFAULT_MODEL, roles=DEFAULT_ROLES, messages=[], structure=str, tokens=DEFAULT_TOKENS):
     response, postproc = _chat(client_sync, model, roles=roles, messages=messages, structure=structure, tokens=tokens)
     return postproc(response)
 
