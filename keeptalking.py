@@ -5,7 +5,7 @@ from pydantic import create_model, BaseModel
 import asyncio
 
 DEFAULT_TOKENS = 2048
-DEFAULT_MODEL = 'openrouter/auto'
+DEFAULT_MODEL = 'google/gemini-2.5-flash'
 
 class SyncAsyncError(RuntimeError):
     pass
