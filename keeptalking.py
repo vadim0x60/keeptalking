@@ -5,10 +5,10 @@ from pydantic import create_model, BaseModel
 import asyncio
 import itertools
 
-DEFAULT_TOKENS = 2048
-DEFAULT_MODEL = 'google/gemini-2.5-flash'
-DEFAULT_ROLES = itertools.chain(['system'], itertools.cycle(['user']))
-MAX_ASYNC = 10
+TOKENS = int(os.getenv('TOKENS', 2048))
+MODEL = os.getenv('MODEL', 'google/gemini-2.5-flash')
+ROLES = itertools.chain(['system'], itertools.cycle(['user']))
+MAX_ASYNC = int(os.getenv('MAX_ASYNC', 10))
 
 class SyncAsyncError(RuntimeError):
     pass
@@ -62,15 +62,15 @@ def _chat(client, model, roles, messages, structure, tokens):
                     max_completion_tokens=tokens
                 ), lambda response: response.choices[0].message.parsed.response)  
 
-async def write(model=DEFAULT_MODEL, roles=DEFAULT_ROLES, messages=[], structure=str, tokens=DEFAULT_TOKENS):
+async def write(model=MODEL, roles=ROLES, messages=[], structure=str, tokens=TOKENS):
     response, postproc = _chat(client_async, model, roles=roles, messages=messages, structure=structure, tokens=tokens)
     return postproc(await response)
 
-def talk(model=DEFAULT_MODEL, roles=DEFAULT_ROLES, messages=[], structure=str, tokens=DEFAULT_TOKENS):
+def talk(model=MODEL, roles=ROLES, messages=[], structure=str, tokens=TOKENS):
     response, postproc = _chat(client_sync, model, roles=roles, messages=messages, structure=structure, tokens=tokens)
     return postproc(response)
 
-def vibe(model=DEFAULT_MODEL, tokens=DEFAULT_TOKENS):
+def vibe(model=MODEL, tokens=TOKENS):
     def _vibe(f):
         rt = f.__annotations__.get('return', str)
         if asyncio.iscoroutinefunction(f):
