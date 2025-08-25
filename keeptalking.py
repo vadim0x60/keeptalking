@@ -63,14 +63,26 @@ def _chat(client, model, roles, messages, structure, tokens):
                 ), lambda response: response.choices[0].message.parsed.response)  
 
 async def write(model=MODEL, roles=ROLES, messages=[], structure=str, tokens=TOKENS):
+    """Get $model to (asynchronously) respond to $messages.
+    
+    Messages can be assigned $roles (system, user, assistant, etc.)
+    By default the first message is system, the rest are user
+    The response will be of type $structure (string by default) and truncated to $tokens (2048 by default)"""
     response, postproc = _chat(client_async, model, roles=roles, messages=messages, structure=structure, tokens=tokens)
     return postproc(await response)
 
 def talk(model=MODEL, roles=ROLES, messages=[], structure=str, tokens=TOKENS):
+    """Get $model to (synchronously) respond to $messages.
+    
+    Messages can be assigned $roles (system, user, assistant, etc.)
+    By default the first message is system, the rest are user
+    The response will be of type $structure (string by default) and truncated to $tokens (2048 by default)"""
     response, postproc = _chat(client_sync, model, roles=roles, messages=messages, structure=structure, tokens=tokens)
     return postproc(response)
 
 def vibe(model=MODEL, tokens=TOKENS):
+    """Create a vibe function (natural language defined function)
+    Make sure it has a docstring and returns a text description of the job to be done"""
     def _vibe(f):
         rt = f.__annotations__.get('return', str)
         if asyncio.iscoroutinefunction(f):
