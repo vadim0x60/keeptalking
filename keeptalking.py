@@ -20,7 +20,7 @@ if base_url:
 else:
     api_key = os.getenv("OPENROUTER_API_KEY")
     if api_key:
-        params['base_url'] = 'https://api.openrouter.ai/api/v1'
+        params['base_url'] = 'https://openrouter.ai/api/v1'
         params['api_key'] = api_key
     else:
         api_key = os.getenv("OPENAI_API_KEY")
