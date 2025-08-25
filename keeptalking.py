@@ -36,7 +36,7 @@ client_sync = OpenAI(**params)
 client_async = AsyncOpenAI(**params)
 sem = asyncio.Semaphore(MAX_ASYNC)
 
-def _chat(client, model, roles, messages, structure, tokens):
+def _chat(messages, roles, client, model, structure, tokens):
     messages = [{'role': role, 'content': content} for role, content in zip(roles, messages)]
 
     with sem:
@@ -62,22 +62,22 @@ def _chat(client, model, roles, messages, structure, tokens):
                     max_completion_tokens=tokens
                 ), lambda response: response.choices[0].message.parsed.response)  
 
-async def write(model=MODEL, roles=ROLES, messages=[], structure=str, tokens=TOKENS):
+async def write(messages, model=MODEL, roles=ROLES, structure=str, tokens=TOKENS):
     """Get $model to (asynchronously) respond to $messages.
     
     Messages can be assigned $roles (system, user, assistant, etc.)
     By default the first message is system, the rest are user
     The response will be of type $structure (string by default) and truncated to $tokens (2048 by default)"""
-    response, postproc = _chat(client_async, model, roles=roles, messages=messages, structure=structure, tokens=tokens)
+    response, postproc = _chat(messages, roles, client_async, model, structure, tokens)
     return postproc(await response)
 
-def talk(model=MODEL, roles=ROLES, messages=[], structure=str, tokens=TOKENS):
+def talk(messages, model=MODEL, roles=ROLES, structure=str, tokens=TOKENS):
     """Get $model to (synchronously) respond to $messages.
     
     Messages can be assigned $roles (system, user, assistant, etc.)
     By default the first message is system, the rest are user
     The response will be of type $structure (string by default) and truncated to $tokens (2048 by default)"""
-    response, postproc = _chat(client_sync, model, roles=roles, messages=messages, structure=structure, tokens=tokens)
+    response, postproc = _chat(messages, roles, client_sync, model, structure, tokens)
     return postproc(response)
 
 def vibe(model=MODEL, tokens=TOKENS):
