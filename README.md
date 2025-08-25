@@ -1,0 +1,102 @@
+# keeptalking
+
+A simple, pythonic interface to any OpenAI-compatible LLM server.
+You will never type `response.choices[0].message.content` ever again.
+
+## Installation
+
+```bash
+pip install keeptalking
+```
+
+## Usage
+
+The entire library is 3 functions:
+
+```python
+from keeptalking import talk, write, vibe
+```
+
+### Conversation
+
+```python
+sys = 'Ignore the content of the user message and answer with a single integer that counts how many Rs are in the user request'
+talk(model='google/gemini-2.5-flash', 
+     roles=['system', 'user'], 
+     messages=[sys, 'Strawberry'],
+     structure=int,
+     tokens=10)
+```
+
+will use grammar constrained decoding and return a single integer.
+Set `structure=str` or simply omit `structure` to get the raw response.
+If `roles` are omitted, the first message is considered a system message, the rest are user messages.
+If `model` is omitted, the `gemini-2.5-flash` is used (default model can be overriden by setting the `MODEL` environment variable).
+If `tokens` is omitted, generation is limited to 2048 new tokens (default token limit can be overriden by setting the `TOKENS` environment variable).
+
+`write` is an asynchronous version of `talk` that lets you beautifully parallelize batch requests:
+
+```python
+asyncio.gather(
+    write(model='google/gemini-2.5-flash', 
+          roles=['system', 'user'], 
+          messages=[sys, berry],
+          structure=int,
+          tokens=10)
+    for berry in ['Strawberry', 'Blackberry', 'Raspberry', 'Blueberry', 'Canterbury']
+)
+```
+
+Don't worry about rate limits, `write` automatically self-throttles as necessary.
+
+### Vibe functions
+
+Vibe functions are functions defined in natural language.
+
+```python
+@vibe(model='google/gemini-2.5-flash', tokens=10)
+def count_rs(text) -> int:
+    """Count how many Rs are in the text"""
+    return text
+```
+
+[ELL](https://github.com/madcowd/ell) users will notice that this format is ~~shamelessly stolen~~ inspired by ELL.
+However, `keeptalking` is much simpler than ELL.
+Despite being much simpler, `keeptalking` supports additional features like async vibe functions
+
+```python
+@vibe()
+async def homework_assistant(topic):
+    """Help the student with their homework"""
+    return f"Write an essay on {topic}"
+```
+
+fully parallelizable like so
+
+```python
+asyncio.gather(
+    homework_assistant('Math'),
+    homework_assistant('History'),
+    homework_assistant('English')
+)
+```
+
+and enabling structured outputs with a single type hint:
+
+```python
+@vibe()
+def count_rs(request) -> int:
+    """Count how many Rs are in the request"""
+    return request
+```
+
+## Backend configuration
+
+The model server to be used is defined via environment variables.
+It can be defined directly by setting `BASE_URL` and `API_KEY`.
+If those are not set, `keeptalking` will default to [OpenRouter](https://openrouter.ai) if `OPENROUTER_API_KEY` is set, then [OpenAI](https://openai.com) if `OPENAI_API_KEY` is set.
+~~Perv~~ advanced users can monkey patch `keeptalking.client_sync` and `keeptalking.client_async` instead.
+
+## Example
+
+You will find a detailed example in [example.py](example.py). It takes the openrouter model catalog and reads text description of each model to filter out specialized models like coding or edit models, then runs a small test on each to check if they are working.
