@@ -20,19 +20,24 @@ from keeptalking import talk, write, vibe
 ### Conversation
 
 ```python
-sys = 'Ignore the content of the user message and answer with a single integer that counts how many Rs are in the user request'
 talk(model='google/gemini-2.5-flash', 
      roles=['system', 'user'], 
-     messages=[sys, 'Strawberry'],
+     messages=['Solve a math problem', 'Sum up all possible bases in which 97 is divisible by 17'],
      structure=int,
      tokens=10)
 ```
 
-will use grammar constrained decoding and return a single integer.
+will use grammar constrained decoding and return a single integer with the answer.
 The return value of `talk` will always be of type `structure`, which defaults to `str` is omitted.
 If `roles` are omitted, the first message is considered a system message, the rest are user messages.
 If `model` is omitted, the `gemini-2.5-flash` is used (default model can be overriden by setting the `MODEL` environment variable).
-If `tokens` is omitted, generation is limited to 2048 new tokens (default token limit can be overriden by setting the `TOKENS` environment variable).
+If `tokens` is omitted, generation is limited to 2048 new tokens (default token limit can be overridden by setting the `TOKENS` environment variable).
+
+The only parameter that should not be omitted is `messages`:
+
+```python
+talk(['Solve a math problem. Provide your reasoning', 'Sum up all possible bases in which 97 is divisible by 17'])
+```
 
 `write` is an asynchronous version of `talk` that lets you beautifully parallelize batch requests:
 
@@ -66,9 +71,9 @@ Despite being much simpler, `keeptalking` supports additional features like asyn
 
 ```python
 @vibe()
-async def homework_assistant(topic):
+async def homework_assistant(topic, pages=5):
     """Help the student with their homework"""
-    return f"Write an essay on {topic}"
+    return f"Write a {pages}-page essay on {topic}"
 ```
 
 fully parallelizable like so
