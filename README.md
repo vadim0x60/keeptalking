@@ -29,7 +29,7 @@ talk(model='google/gemini-2.5-flash',
 ```
 
 will use grammar constrained decoding and return a single integer.
-Set `structure=str` or simply omit `structure` to get the raw response.
+The return value of `talk` will always be of type `structure`, which defaults to `str` is omitted.
 If `roles` are omitted, the first message is considered a system message, the rest are user messages.
 If `model` is omitted, the `gemini-2.5-flash` is used (default model can be overriden by setting the `MODEL` environment variable).
 If `tokens` is omitted, generation is limited to 2048 new tokens (default token limit can be overriden by setting the `TOKENS` environment variable).
