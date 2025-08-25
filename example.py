@@ -3,7 +3,6 @@ from keeptalking import vibe
 import asyncio
 import logging
 import openai
-import logging
 
 logging.basicConfig(level=logging.DEBUG)
 
