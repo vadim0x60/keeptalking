@@ -60,9 +60,9 @@ Vibe functions are functions defined in natural language.
 
 ```python
 @vibe(model='google/gemini-2.5-flash', tokens=10)
-def count_rs(text) -> int:
-    """Count how many Rs are in the text"""
-    return text
+def do_job(job_details):
+    """System message"""
+    return f"User message with {job_details}"
 ```
 
 [ELL](https://github.com/madcowd/ell) users will notice that this format is ~~shamelessly stolen~~ inspired by ELL.
@@ -94,6 +94,8 @@ def count_rs(request) -> int:
     """Count how many Rs are in the request"""
     return request
 ```
+
+unlike in the rest of the Python ecosystem, in vibe functions type hints actually ensure that the return value is always of the type in question
 
 ## Backend configuration
 
