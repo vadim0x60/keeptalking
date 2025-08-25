@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "keeptalking"
+version = "0.1.0"
+description = "LLM client library OpenAI should have made"
+authors = ["Vadim Liventsev <dev@vadim.me>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+openai = "^1.101"
+pydantic = "^2.11"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
