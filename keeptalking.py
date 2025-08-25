@@ -8,6 +8,7 @@ import itertools
 DEFAULT_TOKENS = 2048
 DEFAULT_MODEL = 'google/gemini-2.5-flash'
 DEFAULT_ROLES = itertools.chain(['system'], itertools.cycle(['user']))
+MAX_ASYNC = 10
 
 class SyncAsyncError(RuntimeError):
     pass
@@ -33,31 +34,33 @@ else:
 
 client_sync = OpenAI(**params)
 client_async = AsyncOpenAI(**params)
+sem = asyncio.Semaphore(MAX_ASYNC)
 
 def _chat(client, model, roles, messages, structure, tokens):
     messages = [{'role': role, 'content': content} for role, content in zip(roles, messages)]
 
-    if structure == str:
-        return (client.chat.completions.create(model=model, messages=messages, max_completion_tokens=tokens), 
-                lambda response: response.choices[0].message.content)
-    else:
-        if issubclass(structure, BaseModel):
-            return (client.beta.chat.completions.parse(
-                model=model,
-                messages=messages,
-                response_format=structure,
-                max_completion_tokens=tokens
-            ), lambda response: response.choices[0].message.parsed)
+    with sem:
+        if structure == str:
+            return (client.chat.completions.create(model=model, messages=messages, max_completion_tokens=tokens), 
+                    lambda response: response.choices[0].message.content)
         else:
-            # OpenAI interface supports pydantic models only
-            # But we can just wrap anything into a pydantic model and unwrap it back
-            # This will be our little secret
-            return (client.beta.chat.completions.parse(
-                model=model,
-                messages=messages,
-                response_format=create_model('ModelResponse', response=structure),
-                max_completion_tokens=tokens
-            ), lambda response: response.choices[0].message.parsed.response)  
+            if issubclass(structure, BaseModel):
+                return (client.beta.chat.completions.parse(
+                    model=model,
+                    messages=messages,
+                    response_format=structure,
+                    max_completion_tokens=tokens
+                ), lambda response: response.choices[0].message.parsed)
+            else:
+                # OpenAI interface supports pydantic models only
+                # But we can just wrap anything into a pydantic model and unwrap it back
+                # This will be our little secret
+                return (client.beta.chat.completions.parse(
+                    model=model,
+                    messages=messages,
+                    response_format=create_model('ModelResponse', response=structure),
+                    max_completion_tokens=tokens
+                ), lambda response: response.choices[0].message.parsed.response)  
 
 async def write(model=DEFAULT_MODEL, roles=DEFAULT_ROLES, messages=[], structure=str, tokens=DEFAULT_TOKENS):
     response, postproc = _chat(client_async, model, roles=roles, messages=messages, structure=structure, tokens=tokens)
