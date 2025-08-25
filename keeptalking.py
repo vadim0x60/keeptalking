@@ -35,7 +35,7 @@ else:
 client_sync = OpenAI(**params)
 client_async = AsyncOpenAI(**params)
 
-def _chat(messages, roles, client, model, structure, tokens):
+def _chat(client, messages, roles, model, structure, tokens):
     messages = [{'role': role, 'content': content} for role, content in zip(roles, messages)]
 
     if structure == str:
@@ -61,23 +61,23 @@ def _chat(messages, roles, client, model, structure, tokens):
             ), lambda response: response.choices[0].message.parsed.response)  
 
 sem = asyncio.Semaphore(MAX_ASYNC)
-async def write(messages, model=MODEL, roles=ROLES, structure=str, tokens=TOKENS):
+async def write(messages, roles=ROLES, model=MODEL, structure=str, tokens=TOKENS):
     """Get $model to (asynchronously) respond to $messages.
     
     Messages can be assigned $roles (system, user, assistant, etc.)
     By default the first message is system, the rest are user
     The response will be of type $structure (string by default) and truncated to $tokens (2048 by default)"""
     async with sem: # this should not be needed because the client handles retries, but in practice it is
-        response, postproc = _chat(messages, roles, client_async, model, structure, tokens)
+        response, postproc = _chat(client_async, messages, roles, model, structure, tokens)
         return postproc(await response)
 
-def talk(messages, model=MODEL, roles=ROLES, structure=str, tokens=TOKENS):
+def talk(messages, roles=ROLES, model=MODEL, structure=str, tokens=TOKENS):
     """Get $model to (synchronously) respond to $messages.
     
     Messages can be assigned $roles (system, user, assistant, etc.)
     By default the first message is system, the rest are user
     The response will be of type $structure (string by default) and truncated to $tokens (2048 by default)"""
-    response, postproc = _chat(messages, roles, client_sync, model, structure, tokens)
+    response, postproc = _chat(client_sync, messages, roles, model, structure, tokens)
     return postproc(response)
 
 def vibe(model=MODEL, tokens=TOKENS):
@@ -88,11 +88,11 @@ def vibe(model=MODEL, tokens=TOKENS):
         if asyncio.iscoroutinefunction(f):
             @wraps(f)
             async def __vibe(*args, **kwargs):
-                return await write(model, messages=[f.__doc__, await f(*args, **kwargs)], 
-                                   structure=rt, tokens=tokens)
+                return await write(messages=[f.__doc__, await f(*args, **kwargs)], 
+                                   model=model, structure=rt, tokens=tokens)
         else:
             @wraps(f)
             def __vibe(*args, **kwargs):
-                return talk(model, messages=[f.__doc__, f(*args, **kwargs)], structure=rt, tokens=tokens)
+                return talk(messages=[f.__doc__, f(*args, **kwargs)], model=model, structure=rt, tokens=tokens)
         return __vibe
     return _vibe
