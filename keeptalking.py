@@ -36,7 +36,7 @@ client_sync = OpenAI(**params)
 client_async = AsyncOpenAI(**params)
 
 def _chat(client, messages, roles, model, structure, tokens):
-    messages = [{'role': role, 'content': content} for role, content in zip(roles, messages)]
+    messages = [{'role': role, 'content': content} for role, content in zip(roles, messages) if content]
 
     if structure == str:
         return (client.chat.completions.create(model=model, messages=messages, max_completion_tokens=tokens), 
