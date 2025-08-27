@@ -4,6 +4,7 @@ from openai import AsyncOpenAI, OpenAI
 from pydantic import create_model, BaseModel
 import asyncio
 import itertools
+import tenacity as t
 
 TOKENS = int(os.getenv('TOKENS', 2048))
 MODEL = os.getenv('MODEL', 'google/gemini-2.5-flash')
@@ -61,6 +62,8 @@ def _chat(client, messages, roles, model, structure, tokens):
             ), lambda response: response.choices[0].message.parsed.response)  
 
 sem = asyncio.Semaphore(MAX_ASYNC)
+
+@t.retry(retry=t.retry_if_result(lambda x: x is None), stop=t.stop_after_attempt(3))
 async def write(messages, roles=ROLES, model=MODEL, structure=str, tokens=TOKENS):
     """Get $model to (asynchronously) respond to $messages.
     
@@ -71,6 +74,7 @@ async def write(messages, roles=ROLES, model=MODEL, structure=str, tokens=TOKENS
         response, postproc = _chat(client_async, messages, roles, model, structure, tokens)
         return postproc(await response)
 
+@t.retry(retry=t.retry_if_result(lambda x: x is None), stop=t.stop_after_attempt(3))
 def talk(messages, roles=ROLES, model=MODEL, structure=str, tokens=TOKENS):
     """Get $model to (synchronously) respond to $messages.
     
