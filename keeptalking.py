@@ -61,9 +61,11 @@ def _chat(client, messages, roles, model, structure, tokens):
                 max_completion_tokens=tokens
             ), lambda response: response.choices[0].message.parsed.response)  
 
+structure_tantrums = (AttributeError, AssertionError, TypeError)
+
 sem = asyncio.Semaphore(MAX_ASYNC)
 
-@t.retry(retry=t.retry_if_exception_type((AttributeError, AssertionError)), stop=t.stop_after_attempt(3))
+@t.retry(retry=t.retry_if_exception_type(structure_tantrums), stop=t.stop_after_attempt(3))
 async def write(messages, roles=ROLES, model=MODEL, structure=str, tokens=TOKENS):
     """Get $model to (asynchronously) respond to $messages.
     
@@ -76,7 +78,7 @@ async def write(messages, roles=ROLES, model=MODEL, structure=str, tokens=TOKENS
         assert res is not None
         return res
 
-@t.retry(retry=t.retry_if_exception_type((AttributeError, AssertionError)), stop=t.stop_after_attempt(3))
+@t.retry(retry=t.retry_if_exception_type(structure_tantrums), stop=t.stop_after_attempt(3))
 def talk(messages, roles=ROLES, model=MODEL, structure=str, tokens=TOKENS):
     """Get $model to (synchronously) respond to $messages.
     
