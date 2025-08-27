@@ -63,7 +63,7 @@ def _chat(client, messages, roles, model, structure, tokens):
 
 sem = asyncio.Semaphore(MAX_ASYNC)
 
-@t.retry(retry=t.retry_if_result(lambda x: x is None), stop=t.stop_after_attempt(3))
+@t.retry(retry=t.retry_if_exception_type((AttributeError, AssertionError)), stop=t.stop_after_attempt(3))
 async def write(messages, roles=ROLES, model=MODEL, structure=str, tokens=TOKENS):
     """Get $model to (asynchronously) respond to $messages.
     
@@ -72,9 +72,11 @@ async def write(messages, roles=ROLES, model=MODEL, structure=str, tokens=TOKENS
     The response will be of type $structure (string by default) and truncated to $tokens (2048 by default)"""
     async with sem: # this should not be needed because the client handles retries, but in practice it is
         response, postproc = _chat(client_async, messages, roles, model, structure, tokens)
-        return postproc(await response)
+        res = postproc(await response)
+        assert res is not None
+        return res
 
-@t.retry(retry=t.retry_if_result(lambda x: x is None), stop=t.stop_after_attempt(3))
+@t.retry(retry=t.retry_if_exception_type((AttributeError, AssertionError)), stop=t.stop_after_attempt(3))
 def talk(messages, roles=ROLES, model=MODEL, structure=str, tokens=TOKENS):
     """Get $model to (synchronously) respond to $messages.
     
@@ -82,7 +84,9 @@ def talk(messages, roles=ROLES, model=MODEL, structure=str, tokens=TOKENS):
     By default the first message is system, the rest are user
     The response will be of type $structure (string by default) and truncated to $tokens (2048 by default)"""
     response, postproc = _chat(client_sync, messages, roles, model, structure, tokens)
-    return postproc(response)
+    res = postproc(response)
+    assert res is not None
+    return res
 
 def vibe(model=MODEL, tokens=TOKENS):
     """Create a vibe function (natural language defined function)

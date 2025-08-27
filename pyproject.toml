@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "keeptalking"
-version = "0.3.0"
+version = "0.3.1"
 description = "LLM client library OpenAI should have made"
 authors = ["Vadim Liventsev <dev@vadim.me>"]
 license = "MIT"
