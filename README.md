@@ -30,7 +30,7 @@ talk(model='google/gemini-2.5-flash',
 will use grammar constrained decoding and return a single integer with the answer.
 The return value of `talk` will always be of type `structure`, which defaults to `str` is omitted.
 If `roles` are omitted, the first message is considered a system message, the rest are user messages.
-If `model` is omitted, the `gemini-2.5-flash` is used (default model can be overriden by setting the `MODEL` environment variable).
+If `model` is omitted, `gemini-2.5-flash` is used (default model can be overriden by setting the `MODEL` environment variable).
 If `tokens` is omitted, generation is limited to 2048 new tokens (default token limit can be overridden by setting the `TOKENS` environment variable).
 
 The only parameter that should not be omitted is `messages`:
@@ -60,9 +60,9 @@ Vibe functions are functions defined in natural language.
 
 ```python
 @vibe(model='google/gemini-2.5-flash', tokens=10)
-def count_rs(text) -> int:
-    """Count how many Rs are in the text"""
-    return text
+def do_job(job_details):
+    """System message"""
+    return f"User message with {job_details}"
 ```
 
 [ELL](https://github.com/madcowd/ell) users will notice that this format is ~~shamelessly stolen~~ inspired by ELL.
@@ -94,6 +94,8 @@ def count_rs(request) -> int:
     """Count how many Rs are in the request"""
     return request
 ```
+
+unlike in the rest of the Python ecosystem, in vibe functions type hints actually ensure that the return value is always of the type in question
 
 ## Backend configuration
 
