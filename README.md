@@ -106,4 +106,4 @@ If those are not set, `keeptalking` will default to [OpenRouter](https://openrou
 
 ## Example
 
-You will find a detailed example in [example.py](example.py). It takes the openrouter model catalog and reads text description of each model to filter out specialized models like coding or edit models, then runs a small test on each to check if they are working.
+You will find a detailed example in [example.py](example.py). It takes top 10 models from openrouter's model catalog and reads text description of each model to filter out specialized models like coding or edit models, then runs a small test on each to check if they are working.
