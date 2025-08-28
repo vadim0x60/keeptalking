@@ -42,6 +42,7 @@ talk(['Solve a math problem. Provide your reasoning', 'Sum up all possible bases
 `write` is an asynchronous version of `talk` that lets you beautifully parallelize batch requests:
 
 ```python
+sys = "Count the number of r's in the user message"
 asyncio.gather(
     write(model='google/gemini-2.5-flash', 
           roles=['system', 'user'], 
