@@ -1,6 +1,7 @@
 # keeptalking
 
-A simple, pythonic interface to any OpenAI-compatible LLM server.
+Talking is the simplest, most intuitive interface to anything, yet somehow [common LLM libraries](https://github.com/openai/openai-python) manage to make it complex.
+*keeptalking* is simple, pythonic interface to any OpenAI-compatible LLM server.
 You will never type `response.choices[0].message.content` ever again.
 
 ## Installation
